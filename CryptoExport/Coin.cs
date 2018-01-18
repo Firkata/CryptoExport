@@ -19,8 +19,8 @@ namespace CryptoExport
         [JsonProperty("price_usd")]
         public string PriceUsd { get; set; }
 
-        //[JsonProperty("price_btc")]
-        //public string PriceBtc { get; set; }
+        [JsonProperty("price_btc")]
+        public string PriceBtc { get; set; }
 
         //[JsonProperty("24h_volume_usd")]
         //public string VolumeUsd24H { get; set; }

@@ -15,13 +15,13 @@ namespace CryptoExport
         static void Main(string[] args)
         {
             Console.WriteLine("=============================  Welcome to CryptoExport  =============================");
-            
+
             timer.Elapsed += Timer_Elapsed;
             timer.Enabled = true;
 
             if (!File.Exists(file))
             {
-                string header = string.Format("Date,BTC/USD,BNB/USD,{0}",Environment.NewLine);
+                string header = string.Format("Date,BTC/USD,ETH/USD,ETH/BTC,XRP/USD,XRP/BTC,MIOTA/USD,MIOTA/BTC,{0}", Environment.NewLine);
                 File.WriteAllText(file, header);
             }
 
@@ -30,8 +30,10 @@ namespace CryptoExport
         private static void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             timer.Interval = 5000;
-            List<Coin> binance;
             List<Coin> bitcoin;
+            List<Coin> ethereum;
+            List<Coin> ripple;
+            List<Coin> iota;
             List<Coin> allCoins = new List<Coin>();
 
             string coins = string.Empty;
@@ -39,18 +41,31 @@ namespace CryptoExport
 
             using (WebClient wc = new WebClient())
             {
-                binance = JsonConvert.DeserializeObject<List<Coin>>(wc.DownloadString(Url.binanceUrl));
                 bitcoin = JsonConvert.DeserializeObject<List<Coin>>(wc.DownloadString(Url.bitcoinUrl));
+                ethereum = JsonConvert.DeserializeObject<List<Coin>>(wc.DownloadString(Url.ethereumUrl));
+                ripple = JsonConvert.DeserializeObject<List<Coin>>(wc.DownloadString(Url.rippleUrl));
+                iota = JsonConvert.DeserializeObject<List<Coin>>(wc.DownloadString(Url.iotaUrl));
                 allCoins.AddRange(bitcoin);
-                allCoins.AddRange(binance);
+                allCoins.AddRange(ethereum);
+                allCoins.AddRange(ripple);
+                allCoins.AddRange(iota);
             }
 
-            for (int i = 0; i < allCoins.Count; i++)
+            coins = coins + allCoins[0].PriceUsd + ",";
+            for (int i = 1; i < allCoins.Count; i++)
             {
-                coins = coins + allCoins[i].PriceUsd + ",";
-            }
+                coins = coins + allCoins[i].PriceUsd + "," + allCoins[i].PriceBtc + ",";
 
+            }
+            try
+            {
             File.AppendAllText(file, string.Format("{0},{1}{2}", time, coins, Environment.NewLine));
+            }
+            catch
+            {
+                Console.WriteLine("You are using the file in another program. Please close it to continue. " + "[" + time + "]");
+                return;
+            }
             Console.WriteLine("Last updated at " + time);
 
             #region Comment
